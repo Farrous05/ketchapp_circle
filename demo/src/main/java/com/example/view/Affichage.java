@@ -17,28 +17,42 @@ public class Affichage extends JPanel {
     /** Dimensions de l’ovale */
     public static final int LARG_OVAL = 50;
 
-    /** Ratios de mise à l'échelle */
-    public static final int RATIO_X = 2;
-    public static final int RATIO_Y = 1;
+    // Ratios are now dynamic
+    // private static final int RATIO_X_INIT = 2; // Kept for initial size only
+    // private static final int RATIO_Y_INIT = 1;
 
-    /** Dimensions de la fenêtre */
-    public static final int LARGEUR = (Position.BEFORE + Position.AFTER) * RATIO_X;
-    public static final int HAUTEUR = (Position.HAUTEUR_MAX - Position.HAUTEUR_MIN) * RATIO_Y;
+    /** Dimensions de la fenêtre initiale */
+    public static final int LARGEUR_INIT = (Position.BEFORE + Position.AFTER) * 2;
+    public static final int HAUTEUR_INIT = Position.HAUTEUR_MAX - Position.HAUTEUR_MIN ;
 
 
     /* Le modèle :position courante de l'oval */
     private Position maposition;
 
-    /* Position horizontale calculée */
-    private int positionX;
-
     /** Le constructeur définit la dimension de la fenêtre */
     public Affichage(Position p) {
       maposition = p;
-      setPreferredSize(new Dimension(LARGEUR, HAUTEUR));
-      
-      // Calcul de la position horizontale : BEFORE * RATIO_X - demi-largeur
-      positionX = Position.BEFORE * RATIO_X - LARG_OVAL / 2;
+      setPreferredSize(new Dimension(LARGEUR_INIT, HAUTEUR_INIT));
+    }
+
+    /** Calcule le ratio X dynamiquement */
+    private double getRatioX() {
+        return getWidth() / (double) (Position.BEFORE + Position.AFTER);
+    }
+    
+    /** Calcule le ratio Y dynamiquement */
+    private double getRatioY() {
+        return getHeight() / (double) (Position.HAUTEUR_MAX - Position.HAUTEUR_MIN);
+    }
+
+    /** Transforme une coordonnée X du modèle en coordonnée X de la vue */
+    public int transformX(int xModel) {
+        return (int) ((xModel + Position.BEFORE) * getRatioX());
+    }
+
+    /** Transforme une coordonnée Y du modèle en coordonnée Y de la vue */
+    public int transformY(int yModel) {
+        return (int) ((Position.HAUTEUR_MAX - yModel) * getRatioY());
     }
 
     /** Redéfinition de la méthode paint */
@@ -46,9 +60,22 @@ public class Affichage extends JPanel {
     public void paint(Graphics g) {
         super.paint(g);
         
-        // Calcul de la position verticale : (HAUTEUR_MAX - hauteur - HAUTEUR_OVALE) * RATIO_Y
-        int positionY = (Position.HAUTEUR_MAX - maposition.getPosition() - Position.HAUTEUR_OVALE) * RATIO_Y;
+        // Calcul des dimensions dynamiques
+        double ratioY = getRatioY();
+
+        // Position X : Le centre est à (xModel=0), donc pixel = transformX(0)
+        // Mais on veut le coin supérieur gauche, donc on retire demi-largeur
+        int x = transformX(0) - LARG_OVAL / 2;
         
-        g.drawOval(positionX, positionY, LARG_OVAL, Position.HAUTEUR_OVALE);
+        // Position Y : Le bas de l'ovale est à yModel. 
+        // transformY donne le pixel correspondant à l'altitude yModel.
+        // Mais drawOval dessine depuis le coin haut-gauche. 
+        // Donc on veut le pixel correspondant à (yModel + HAUTEUR_OVALE) ?
+        // transformY(yModel + HAUTEUR_OVALE) -> (MAX - (y + H)) * RY -> (MAX - y - H) * RY. C'est correct.
+        int y = transformY(maposition.getPosition() + Position.HAUTEUR_OVALE);
+        
+        int h = (int) (Position.HAUTEUR_OVALE * ratioY);
+        
+        g.drawOval(x, y, LARG_OVAL, h);
     }
 }

@@ -35,7 +35,6 @@ public class Main {
 
     /* finaliser */
     maFenetre.pack();
-    maFenetre.setResizable(false);
     maFenetre.setVisible(true);
     }
 }
