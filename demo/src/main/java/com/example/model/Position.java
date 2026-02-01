@@ -3,7 +3,7 @@ package com.example.model;
 public class Position {
 
     /* Constants */
-    public static final int IMPULSION = 10;
+    public static final int IMPULSION = 5;
     public static final int HAUTEUR_OVALE = 100;
     public static final int HAUTEUR_MAX = 400; // Window height equivalent
     public static final int HAUTEUR_MIN = 0;
@@ -17,6 +17,19 @@ public class Position {
 
     /* la position de l'ovale */
     private int position_ovale = Y_START;
+
+    /* l'avancement de l'ovale */
+    private int avancement = 0;
+
+    /* getter sur l'avancement */
+    public int getAvancement() {
+        return avancement;
+    }
+
+    /* fait avancer l'ovale */
+    public void avancer() {
+        avancement++;
+    }
 
     /* getter sur la position */
     public int getPosition() {

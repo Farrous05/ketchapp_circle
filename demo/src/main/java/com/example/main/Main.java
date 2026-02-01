@@ -3,7 +3,9 @@ package com.example.main;
 import javax.swing.JFrame;
 
 import com.example.control.ReactionClic;
+import com.example.model.Avancer;
 import com.example.model.Descendre;
+import com.example.model.Parcours;
 import com.example.model.Position;
 import com.example.view.Affichage;
 import com.example.view.Redessine;
@@ -17,9 +19,10 @@ public class Main {
 
     /* Modèle */
     Position p = new Position();
+    Parcours parcours = new Parcours(p);
 
     /* Affichage */
-    Affichage a = new Affichage(p);
+    Affichage a = new Affichage(p, parcours);
     maFenetre.add(a);
 
     /* rafraissement */
@@ -29,6 +32,10 @@ public class Main {
     /* descente */
     Descendre d = new Descendre(p);
     d.start();
+    
+    /* avance */
+    Avancer av = new Avancer(p, parcours);
+    av.start();
 
     /* Controleur */
     new ReactionClic(a, p);
