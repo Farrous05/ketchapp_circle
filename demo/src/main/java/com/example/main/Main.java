@@ -4,44 +4,64 @@ import javax.swing.JFrame;
 
 import com.example.control.ReactionClic;
 import com.example.model.Avancer;
+import com.example.model.DecorManager;
 import com.example.model.Descendre;
 import com.example.model.Parcours;
 import com.example.model.Position;
 import com.example.view.Affichage;
+import com.example.view.AnimationCollision;
 import com.example.view.Redessine;
 
-/** La classe principale de ce projet */
+/**
+ * Classe principale du jeu Ketchapp Circle.
+ * Initialise tous les composants : modèle, vue, contrôleur et threads.
+ */
 public class Main {
 
-    /** La méthode de lancement du programme */
+    /**
+     * Point d'entrée du programme.
+     * Configure la fenêtre et lance tous les threads du jeu.
+     */
     public static void main(String[] args) {
-    JFrame maFenetre = new JFrame("Exercice 1");
+        JFrame maFenetre = new JFrame("Ketchapp Circle");
+        maFenetre.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    /* Modèle */
-    Position p = new Position();
-    Parcours parcours = new Parcours(p);
+        /* Modèle */
+        Position p = new Position();
+        Parcours parcours = new Parcours(p);
 
-    /* Affichage */
-    Affichage a = new Affichage(p, parcours);
-    maFenetre.add(a);
+        /* Affichage */
+        Affichage a = new Affichage(p, parcours);
+        maFenetre.add(a);
 
-    /* rafraissement */
-    Redessine r = new Redessine(a);
-    r.start();
+        /* Décor parallaxe (montagnes, nuages, arbres) */
+        DecorManager decor = new DecorManager(a);
+        a.setDecorManager(decor);
+        decor.start();
 
-    /* descente */
-    Descendre d = new Descendre(p);
-    d.start();
-    
-    /* avance */
-    Avancer av = new Avancer(p, parcours);
-    av.start();
+        /* Rafraîchissement */
+        Redessine r = new Redessine(a);
+        r.start();
 
-    /* Controleur */
-    new ReactionClic(a, p);
+        /* Descente (gravité) */
+        Descendre d = new Descendre(p);
+        d.start();
+        
+        /* Animation collision */
+        AnimationCollision animCollision = new AnimationCollision(a);
+        animCollision.start();
+        
+        /* Avancement du monde */
+        Avancer av = new Avancer(p, parcours);
+        av.setAnimationCollision(animCollision);
+        av.start();
 
-    /* finaliser */
-    maFenetre.pack();
-    maFenetre.setVisible(true);
+        /* Contrôleur (gestion des clics) */
+        new ReactionClic(a, p);
+
+        /* Finaliser et afficher */
+        maFenetre.setResizable(false);
+        maFenetre.pack();
+        maFenetre.setVisible(true);
     }
 }

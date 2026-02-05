@@ -20,6 +20,26 @@ public class Position {
 
     /* l'avancement de l'ovale */
     private int avancement = 0;
+    
+    /* Nombre de vies restantes */
+    private int lives = 3;
+    
+    /** Retourne le nombre de vies restantes */
+    public int getLives() {
+        return lives;
+    }
+    
+    /** Retire une vie (collision) */
+    public void loseLife() {
+        if (lives > 0) {
+            lives--;
+        }
+    }
+    
+    /** Vérifie si le joueur est toujours en vie */
+    public boolean isAlive() {
+        return lives > 0;
+    }
 
     /* getter sur l'avancement */
     public int getAvancement() {

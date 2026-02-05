@@ -4,6 +4,12 @@ import java.awt.Point;
 import java.util.ArrayList;
 import java.util.Random;
 
+/**
+ * Modèle représentant le terrain du jeu sous forme de ligne brisée infinie.
+ * Gère une liste de points (x, y) qui défilent de droite à gauche.
+ * Assure la génération procédurale de nouveaux points pour maintenir
+ * le terrain devant le joueur.
+ */
 public class Parcours {
 
     /* Constante générateur aléatoire */
@@ -56,7 +62,7 @@ public class Parcours {
         int nextX = lastPoint.x + X_MIN + RAND.nextInt(X_MAX - X_MIN);
         
         int safeMax = Position.HAUTEUR_MAX - Position.HAUTEUR_OVALE;
-        int safeMin = Position.HAUTEUR_MIN;
+        int safeMin = Position.HAUTEUR_MIN + 100;
         int nextY = safeMin + RAND.nextInt(safeMax - safeMin);
         
         points.add(new Point(nextX, nextY));
@@ -82,9 +88,57 @@ public class Parcours {
         // Ajout de nouveaux points
         Point lastPoint = points.get(points.size() - 1);
         // Si le dernier point est proche de l'horizon (x - avancement < AFTER + MARGE)
+        // Si le dernier point est proche de l'horizon (x - avancement < AFTER + 200)
         if ((lastPoint.x - position.getAvancement()) < Position.AFTER + 200) {
             ajouterPoint();
         }
+    }
+
+    /**
+     * Détecte une collision entre l'ovale et la ligne brisée.
+     * L'ovale est situé à X=0 (coordonnées décalées).
+     * Utilise la formule de la pente: Y_ligne = Y1 + (X - X1) * pente
+     * Collision uniquement quand la ligne touche le BORD de l'ovale.
+     * 
+     * @param ovalY position Y du bas de l'ovale
+     * @param ovalHeight hauteur de l'ovale
+     * @return true si collision détectée
+     */
+    public boolean checkCollision(int ovalY, int ovalHeight) {
+        int ovalX = 0;  // L'ovale est toujours en X=0 en coordonnées décalées
+        int ovalTop = ovalY + ovalHeight;
+        
+        // Marge de tolérance pour détecter le contact avec le bord
+        int TOLERANCE = 5;
+        
+        ArrayList<Point> shiftedPoints = getPoints();
+        
+        for (int i = 0; i < shiftedPoints.size() - 1; i++) {
+            Point p1 = shiftedPoints.get(i);
+            Point p2 = shiftedPoints.get(i + 1);
+            
+            // Vérifier si l'ovale est dans ce segment
+            if (p1.x <= ovalX && ovalX <= p2.x) {
+                // Éviter division par zéro (segment vertical)
+                if (p2.x == p1.x) {
+                    continue;
+                }
+                
+                // Calcul de la pente et du Y de la ligne à X=0
+                double pente = (double)(p2.y - p1.y) / (p2.x - p1.x);
+                double yLigne = p1.y + (ovalX - p1.x) * pente;
+                
+                // Collision UNIQUEMENT si la ligne touche le BORD de l'ovale
+                // Proche du bas (ovalY) OU proche du haut (ovalTop)
+                boolean toucheBasOvale = Math.abs(yLigne - ovalY) <= TOLERANCE;
+                boolean toucheHautOvale = Math.abs(yLigne - ovalTop) <= TOLERANCE;
+                
+                if (toucheBasOvale || toucheHautOvale) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /* 
