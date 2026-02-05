@@ -24,6 +24,14 @@ public class Avancer extends Thread {
     /** Référence au thread d'animation de collision */
     private AnimationCollision animationCollision;
 
+    /** Action à exécuter en fin de partie (retour accueil) */
+    private Runnable gameOverAction;
+
+    /** Définit l'action de fin de partie (retour à l'accueil) */
+    public void setGameOverAction(Runnable action) {
+        this.gameOverAction = action;
+    }
+
     /**
      * Constructeur du thread d'avancement.
      * @param p la position du joueur
@@ -67,12 +75,25 @@ public class Avancer extends Thread {
                 position.loseLife();
                 cooldown = 20; // Invulnérabilité pendant 20 frames (~1 sec)
             }
-            
+
+            // Vérification de capture de pomme
+            if (parcours.checkAppleCapture(position.getPosition(), Position.HAUTEUR_OVALE)) {
+                position.incrementScore();
+            }
+
             try {
                 sleep(DELAY);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+        }
+
+        // Sauvegarder le meilleur score en fin de partie
+        ScoreManager.saveBestScore(position.getScore());
+
+        // Retour à l'écran d'accueil
+        if (gameOverAction != null) {
+            javax.swing.SwingUtilities.invokeLater(gameOverAction);
         }
     }
 }

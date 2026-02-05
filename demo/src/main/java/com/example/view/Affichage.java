@@ -1,8 +1,11 @@
 package com.example.view;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -46,6 +49,9 @@ public class Affichage extends JPanel {
     /** Image du coeur (vies) */
     private BufferedImage heartSprite;
 
+    /** Image de la pomme */
+    private BufferedImage appleSprite;
+
     /** Couleur du terrain (blanc) */
     private static final Color TERRAIN_COLOR = Color.WHITE;
 
@@ -61,6 +67,13 @@ public class Affichage extends JPanel {
     /** Frame d'animation actuelle (-1 = pas d'animation) */
     private int frameAnimation = -1;
 
+    /** Frame d'animation de capture de pomme (-1 = pas d'animation) */
+    private int appleAnimFrame = -1;
+
+    /** Position de l'animation pomme en cours (coordonnées modèle décalées) */
+    private int appleAnimX = 0;
+    private int appleAnimY = 0;
+
     /**
      * Constructeur - définit la dimension de la fenêtre.
      * @param p la position du joueur
@@ -75,6 +88,7 @@ public class Affichage extends JPanel {
         try {
             backgroundImage = ImageIO.read(getClass().getResourceAsStream("/sprites/background_sky.png"));
             heartSprite = ImageIO.read(getClass().getResourceAsStream("/sprites/heart.png"));
+            appleSprite = ImageIO.read(getClass().getResourceAsStream("/sprites/apple.png"));
         } catch (IOException | IllegalArgumentException e) {
             System.err.println("Erreur chargement sprites: " + e.getMessage());
         }
@@ -91,6 +105,17 @@ public class Affichage extends JPanel {
     /** Définit la frame d'animation actuelle */
     public void setAnimationFrame(int frame) {
         this.frameAnimation = frame;
+    }
+
+    /** Définit la frame d'animation de capture de pomme */
+    public void setAppleAnimationFrame(int frame) {
+        this.appleAnimFrame = frame;
+    }
+
+    /** Définit la position de l'animation pomme */
+    public void setAppleAnimationPos(int x, int y) {
+        this.appleAnimX = x;
+        this.appleAnimY = y;
     }
 
     /** Calcule le ratio X dynamiquement */
@@ -191,6 +216,58 @@ public class Affichage extends JPanel {
     }
 
     /**
+     * Dessine les pommes collectibles sur le terrain.
+     * @param g2d le contexte Graphics2D
+     */
+    private void drawPommes(Graphics2D g2d) {
+        if (appleSprite == null) return;
+
+        int appleSize = 30;
+        ArrayList<Point> pommes = monParcours.getPommes();
+
+        for (Point p : pommes) {
+            int px = transformX(p.x) - appleSize / 2;
+            int py = transformY(p.y) - appleSize / 2;
+            g2d.drawImage(appleSprite, px, py, appleSize, appleSize, null);
+        }
+
+        // Animation de capture : grossissement + fondu
+        if (appleAnimFrame >= 0 && appleAnimFrame <= AnimationPomme.NOMBRE_FRAMES) {
+            float progress = appleAnimFrame / (float) AnimationPomme.NOMBRE_FRAMES;
+            float scale = 1.0f + progress;
+            float alpha = Math.max(1.0f - progress, 0.01f);
+
+            int animSize = (int) (appleSize * scale);
+            int ax = transformX(appleAnimX) - animSize / 2;
+            int ay = transformY(appleAnimY) - animSize / 2;
+
+            Composite oldComp = g2d.getComposite();
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
+            g2d.drawImage(appleSprite, ax, ay, animSize, animSize, null);
+            g2d.setComposite(oldComp);
+        }
+    }
+
+    /**
+     * Dessine le score (nombre de pommes) en haut à gauche.
+     * @param g2d le contexte Graphics2D
+     */
+    private void drawScore(Graphics2D g2d) {
+        int score = maposition.getScore();
+        int iconSize = 30;
+        int x = 20;
+        int y = 25;
+
+        if (appleSprite != null) {
+            g2d.drawImage(appleSprite, x, y, iconSize, iconSize, null);
+        }
+
+        g2d.setColor(Color.WHITE);
+        g2d.setFont(new Font("Arial", Font.BOLD, 22));
+        g2d.drawString("x " + score, x + iconSize + 5, y + iconSize - 8);
+    }
+
+    /**
      * Méthode de rendu principale utilisant Graphics2D.
      * Dessine dans l'ordre : fond, décor arrière, terrain, ovale, décor avant.
      * @param g le contexte graphique
@@ -216,7 +293,10 @@ public class Affichage extends JPanel {
         
         // 3. Dessine le terrain
         drawParcours(g2d);
-        
+
+        // 3.5 Dessine les pommes (après terrain, avant ovale)
+        drawPommes(g2d);
+
         // 4. Calcul de la position de l'ovale
         double ratioY = getRatioY();
         int x = transformX(0) - LARG_OVAL / 2;
@@ -240,5 +320,8 @@ public class Affichage extends JPanel {
         
         // 7. Dessine les coeurs (HUD)
         drawHearts(g2d);
+
+        // 8. Dessine le score (HUD)
+        drawScore(g2d);
     }
 }

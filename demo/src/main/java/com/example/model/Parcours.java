@@ -2,7 +2,10 @@ package com.example.model;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.Random;
+
+import com.example.view.AnimationPomme;
 
 /**
  * Modèle représentant le terrain du jeu sous forme de ligne brisée infinie.
@@ -22,13 +25,31 @@ public class Parcours {
     /* Liste des points de la ligne brisée */
     private ArrayList<Point> points;
 
+    /* Liste des pommes (coordonnées absolues) */
+    private ArrayList<Point> pommes = new ArrayList<>();
+
+    /* Probabilité de spawn d'une pomme par segment */
+    private static final double POMME_SPAWN_CHANCE = 0.30;
+
+    /* Offset vertical min/max par rapport à la ligne */
+    private static final int POMME_OFFSET_MIN = 20;
+    private static final int POMME_OFFSET_MAX = 40;
+
     /* Le modèle : la position */
     private Position position;
+
+    /* Référence au thread d'animation pomme */
+    private AnimationPomme animationPomme;
 
     public Parcours(Position p) {
         this.position = p;
         points = new ArrayList<>();
         genererParcours();
+    }
+
+    /** Définit le thread d'animation pour les captures de pomme */
+    public void setAnimationPomme(AnimationPomme anim) {
+        this.animationPomme = anim;
     }
 
     /* 
@@ -38,7 +59,8 @@ public class Parcours {
     private void genererParcours() {
         // On commence avant l'horizon (par exemple à -BEFORE)
         int currentX = -Position.BEFORE;
-        int currentY = 20; 
+        // Commence au milieu de l'ovale pour éviter une collision immédiate
+        int currentY = Position.Y_START + Position.HAUTEUR_OVALE / 2;
 
         points.add(new Point(currentX, currentY));
 
@@ -66,6 +88,24 @@ public class Parcours {
         int nextY = safeMin + RAND.nextInt(safeMax - safeMin);
         
         points.add(new Point(nextX, nextY));
+
+        // Génération aléatoire d'une pomme sur ce segment
+        if (RAND.nextDouble() < POMME_SPAWN_CHANCE) {
+            Point prevPoint = points.get(points.size() - 2);
+            int appleX = (prevPoint.x + nextX) / 2;
+
+            // Interpoler le Y de la ligne au milieu du segment
+            double t = (double) (appleX - prevPoint.x) / (nextX - prevPoint.x);
+            int lineY = (int) (prevPoint.y + t * (nextY - prevPoint.y));
+
+            // Offset aléatoire au-dessus ou en dessous de la ligne
+            int offsetMag = POMME_OFFSET_MIN + RAND.nextInt(POMME_OFFSET_MAX - POMME_OFFSET_MIN);
+            int offset = RAND.nextBoolean() ? offsetMag : -offsetMag;
+            int appleY = Math.max(Position.HAUTEUR_MIN + 10,
+                    Math.min(lineY + offset, Position.HAUTEUR_MAX - 10));
+
+            pommes.add(new Point(appleX, appleY));
+        }
     }
 
     /**
@@ -84,6 +124,9 @@ public class Parcours {
                 points.remove(0);
             }
         }
+
+        // Suppression des pommes hors écran
+        pommes.removeIf(pomme -> (pomme.x - position.getAvancement()) < -Position.BEFORE - 50);
 
         // Ajout de nouveaux points
         Point lastPoint = points.get(points.size() - 1);
@@ -141,7 +184,58 @@ public class Parcours {
         return false;
     }
 
-    /* 
+    /**
+     * Vérifie si l'ovale capture une pomme.
+     * Capture = la pomme est à l'intérieur du corps de l'ovale.
+     *
+     * @param ovalY position Y du bas de l'ovale
+     * @param ovalHeight hauteur de l'ovale
+     * @return true si une pomme a été capturée
+     */
+    public boolean checkAppleCapture(int ovalY, int ovalHeight) {
+        int ovalX = 0;
+        int shift = position.getAvancement();
+
+        // Marge pour que le centre de la pomme soit bien à l'intérieur de l'ovale
+        // (correspond au demi-rayon visuel de la pomme en coordonnées modèle)
+        int margin = 15;
+
+        Iterator<Point> it = pommes.iterator();
+        while (it.hasNext()) {
+            Point pomme = it.next();
+            int shiftedX = pomme.x - shift;
+
+            // Pomme horizontalement proche de l'ovale
+            if (Math.abs(shiftedX - ovalX) <= 25) {
+                // Pomme verticalement bien à l'intérieur de l'ovale (pas juste le bord)
+                if (pomme.y >= ovalY + margin && pomme.y <= ovalY + ovalHeight - margin) {
+                    int animX = shiftedX;
+                    int animY = pomme.y;
+                    it.remove();
+
+                    if (animationPomme != null) {
+                        animationPomme.demarrerAnimation(animX, animY);
+                    }
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Retourne la liste des pommes en coordonnées décalées.
+     */
+    public ArrayList<Point> getPommes() {
+        ArrayList<Point> shiftedPommes = new ArrayList<>();
+        int shift = position.getAvancement();
+        for (Point p : pommes) {
+            shiftedPommes.add(new Point(p.x - shift, p.y));
+        }
+        return shiftedPommes;
+    }
+
+    /*
      * Retourne la liste des points décalés de -Position.avancement.
      * On crée une nouvelle liste pour ne pas modifier l'originale.
      */

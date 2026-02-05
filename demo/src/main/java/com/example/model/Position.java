@@ -13,7 +13,7 @@ public class Position {
     private int vitesse = 0;
     
     /* Initial Position */
-    private static final int Y_START = 20;
+    public static final int Y_START = 20;
 
     /* la position de l'ovale */
     private int position_ovale = Y_START;
@@ -23,6 +23,9 @@ public class Position {
     
     /* Nombre de vies restantes */
     private int lives = 3;
+
+    /* Score (nombre de pommes capturées) */
+    private int score = 0;
     
     /** Retourne le nombre de vies restantes */
     public int getLives() {
@@ -39,6 +42,16 @@ public class Position {
     /** Vérifie si le joueur est toujours en vie */
     public boolean isAlive() {
         return lives > 0;
+    }
+
+    /** Retourne le score actuel */
+    public int getScore() {
+        return score;
+    }
+
+    /** Incrémente le score de 1 (pomme capturée) */
+    public void incrementScore() {
+        score++;
     }
 
     /* getter sur l'avancement */
