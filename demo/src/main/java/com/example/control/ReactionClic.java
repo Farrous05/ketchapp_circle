@@ -4,11 +4,12 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
 import com.example.model.Position;
+import com.example.util.SoundManager;
 import com.example.view.Affichage;
 
 /** Le contrôleur sur les clics dans l'affichage */
 public class ReactionClic implements MouseListener {
-    private Position position;
+    private final Position position;
 
     /** Constructeur */
     public ReactionClic(Affichage a, Position p) {
@@ -19,6 +20,7 @@ public class ReactionClic implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent arg0) {
         position.jump();
+        SoundManager.getInstance().playJump();
        // monAffichage.repaint(); en réalité, on ne veut pas redessiner l'interface à l'intèrieur d'un controleur
     }
 

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Random;
 
+import com.example.util.SoundManager;
 import com.example.view.AnimationPomme;
 
 /**
@@ -23,10 +24,10 @@ public class Parcours {
     private static final int X_MAX = 150;
 
     /* Liste des points de la ligne brisée */
-    private ArrayList<Point> points;
+    private final ArrayList<Point> points;
 
     /* Liste des pommes (coordonnées absolues) */
-    private ArrayList<Point> pommes = new ArrayList<>();
+    private final ArrayList<Point> pommes = new ArrayList<>();
 
     /* Probabilité de spawn d'une pomme par segment */
     private static final double POMME_SPAWN_CHANCE = 0.30;
@@ -36,7 +37,7 @@ public class Parcours {
     private static final int POMME_OFFSET_MAX = 40;
 
     /* Le modèle : la position */
-    private Position position;
+    private final Position position;
 
     /* Référence au thread d'animation pomme */
     private AnimationPomme animationPomme;
@@ -177,6 +178,7 @@ public class Parcours {
                 boolean toucheHautOvale = Math.abs(yLigne - ovalTop) <= TOLERANCE;
                 
                 if (toucheBasOvale || toucheHautOvale) {
+                    SoundManager.getInstance().playHit();
                     return true;
                 }
             }
@@ -216,6 +218,7 @@ public class Parcours {
                     if (animationPomme != null) {
                         animationPomme.demarrerAnimation(animX, animY);
                     }
+                    SoundManager.getInstance().playEat();
                     return true;
                 }
             }

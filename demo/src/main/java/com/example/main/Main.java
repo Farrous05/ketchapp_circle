@@ -11,6 +11,7 @@ import com.example.model.DecorManager;
 import com.example.model.Descendre;
 import com.example.model.Parcours;
 import com.example.model.Position;
+import com.example.util.SoundManager;
 import com.example.view.Affichage;
 import com.example.view.AnimationAccueil;
 import com.example.view.AnimationCollision;
@@ -46,6 +47,9 @@ public class Main {
         accueil.setAnimationAccueil(animAccueil);
         animAccueil.start();
 
+        // Musique du menu
+        SoundManager.getInstance().playMenuMusic();
+
         /* Action du bouton "Jouer" : créer et lancer le jeu */
         accueil.setStartAction(() -> {
             // Créer le modèle
@@ -60,6 +64,9 @@ public class Main {
             DecorManager decor = new DecorManager(a);
             a.setDecorManager(decor);
             decor.start();
+
+            // Musique de combat
+            SoundManager.getInstance().playBattleMusic();
 
             // Rafraîchissement
             Redessine r = new Redessine(a);
@@ -86,6 +93,7 @@ public class Main {
                 container.remove(a);
                 accueil.repaint();
                 cardLayout.show(container, "accueil");
+                SoundManager.getInstance().playMenuMusic();
             });
             av.start();
 
