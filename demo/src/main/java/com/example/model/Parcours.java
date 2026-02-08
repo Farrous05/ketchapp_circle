@@ -16,30 +16,32 @@ import com.example.view.AnimationPomme;
  */
 public class Parcours {
 
-    /* Constante générateur aléatoire */
+    /** Générateur aléatoire */
     private static final Random RAND = new Random();
 
-    /* Constantes X_MIN et X_MAX définissant l'écart minimum et maximum en X */
+    /** Écart horizontal minimum entre deux points */
     private static final int X_MIN = 50;
+    /** Écart horizontal maximum entre deux points */
     private static final int X_MAX = 150;
 
-    /* Liste des points de la ligne brisée */
+    /** Liste des points de la ligne brisée */
     private final ArrayList<Point> points;
 
-    /* Liste des pommes (coordonnées absolues) */
+    /** Liste des pommes (coordonnées absolues) */
     private final ArrayList<Point> pommes = new ArrayList<>();
 
-    /* Probabilité de spawn d'une pomme par segment */
+    /** Probabilité de spawn d'une pomme par segment (30%) */
     private static final double POMME_SPAWN_CHANCE = 0.30;
 
-    /* Offset vertical min/max par rapport à la ligne */
+    /** Offset vertical min par rapport à la ligne */
     private static final int POMME_OFFSET_MIN = 20;
+    /** Offset vertical max par rapport à la ligne */
     private static final int POMME_OFFSET_MAX = 40;
 
-    /* Le modèle : la position */
+    /** Référence au modèle Position */
     private final Position position;
 
-    /* Référence au thread d'animation pomme */
+    /** Référence au thread d'animation pomme */
     private AnimationPomme animationPomme;
 
     public Parcours(Position p) {
@@ -53,7 +55,7 @@ public class Parcours {
         this.animationPomme = anim;
     }
 
-    /* 
+    /**
      * Initialise la liste points avec 2 points initiaux.
      * Le reste sera généré dynamiquement par update().
      */
@@ -238,9 +240,9 @@ public class Parcours {
         return shiftedPommes;
     }
 
-    /*
-     * Retourne la liste des points décalés de -Position.avancement.
-     * On crée une nouvelle liste pour ne pas modifier l'originale.
+    /**
+     * Retourne la liste des points décalés de -avancement.
+     * Crée une copie défensive pour éviter ConcurrentModificationException.
      */
     public ArrayList<Point> getPoints() {
         ArrayList<Point> shiftedPoints = new ArrayList<>();

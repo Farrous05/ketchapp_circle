@@ -1,30 +1,35 @@
 package com.example.model;
 
+/**
+ * Modèle central du joueur.
+ * Encapsule la position verticale de l'ovale, sa vitesse, l'avancement
+ * horizontal, le nombre de vies et le score.
+ */
 public class Position {
 
-    /* Constants */
+    /** Constantes de gameplay */
     public static final int IMPULSION = 5;
     public static final int HAUTEUR_OVALE = 100;
-    public static final int HAUTEUR_MAX = 400; // Window height equivalent
+    public static final int HAUTEUR_MAX = 400;
     public static final int HAUTEUR_MIN = 0;
     public static final int BEFORE = 50;
     public static final int AFTER = 200;
 
     private int vitesse = 0;
     
-    /* Initial Position */
+    /** Position verticale initiale du joueur */
     public static final int Y_START = 20;
 
-    /* la position de l'ovale */
+    /** Position verticale courante de l'ovale */
     private int position_ovale = Y_START;
 
-    /* l'avancement de l'ovale */
+    /** Avancement horizontal global (scrolling) */
     private int avancement = 0;
     
-    /* Nombre de vies restantes */
+    /** Nombre de vies restantes */
     private int lives = 3;
 
-    /* Score (nombre de pommes capturées) */
+    /** Score (nombre de pommes capturées) */
     private int score = 0;
     
     /** Retourne le nombre de vies restantes */
@@ -54,28 +59,28 @@ public class Position {
         score++;
     }
 
-    /* getter sur l'avancement */
+    /** Retourne l'avancement horizontal global */
     public int getAvancement() {
         return avancement;
     }
 
-    /* fait avancer l'ovale */
+    /** Incrémente l'avancement de 1 (scrolling) */
     public void avancer() {
         avancement++;
     }
 
-    /* getter sur la position */
+    /** Retourne la position verticale de l'ovale */
     public int getPosition() {
         return position_ovale;
     }
 
-    /* setter sur la position : sauter de IMPULSION pixels */
+    /** Applique une impulsion de saut (vitesse ← IMPULSION) */
     public void jump() {
         vitesse = IMPULSION;
         
     }
 
-    /* descendre : diminue la position_ovale de 1 (sans passer sous la fenetre) */
+    /** Applique la physique : gravité (décélération) et bornes verticales */
     public void move() {
         int sol = HAUTEUR_MAX - HAUTEUR_OVALE;
 

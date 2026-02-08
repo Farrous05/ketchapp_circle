@@ -31,6 +31,7 @@ public class SoundManager {
         // Constructeur privé
     }
 
+    /** Retourne l'instance unique du SoundManager (Singleton) */
     public static synchronized SoundManager getInstance() {
         if (instance == null) {
             instance = new SoundManager();
@@ -70,14 +71,17 @@ public class SoundManager {
         }).start();
     }
 
+    /** Joue le son de saut */
     public void playJump() {
         playSound(SOUND_JUMP);
     }
 
+    /** Joue le son d'impact (collision) */
     public void playHit() {
         playSound(SOUND_HIT);
     }
 
+    /** Joue le son de capture de pomme */
     public void playEat() {
         playSound(SOUND_EAT);
     }
@@ -117,10 +121,12 @@ public class SoundManager {
         }).start();
     }
 
+    /** Lance la musique du menu (boucle infinie) */
     public void playMenuMusic() {
         playMusic(SOUND_MENU);
     }
 
+    /** Lance la musique de jeu (boucle infinie) */
     public void playBattleMusic() {
         playMusic(SOUND_BATTLE);
     }

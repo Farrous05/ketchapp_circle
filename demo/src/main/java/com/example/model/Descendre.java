@@ -5,7 +5,7 @@ public class Descendre extends Thread {
     /** Une descente toutes les 100ms */
     public static final int DELAY = 100;
   
-    /* Le modèle */
+    /** Le modèle */
     private Position position;
   
     /** Constructeur */
@@ -13,7 +13,7 @@ public class Descendre extends Thread {
       position = p;
     }
   
-    /** Diminue la hauteur de 1 toutes les 100ms (sans descendre sous 0) */
+    /** Applique la gravité (appelle position.move()) toutes les 100ms */
     @Override
     public void run() {
       while (true) {

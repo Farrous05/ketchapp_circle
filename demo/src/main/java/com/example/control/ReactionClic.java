@@ -17,6 +17,7 @@ public class ReactionClic implements MouseListener {
         position = p;
     }
 
+    /** Déclenche le saut et joue le son correspondant */
     @Override
     public void mouseClicked(MouseEvent arg0) {
         position.jump();
